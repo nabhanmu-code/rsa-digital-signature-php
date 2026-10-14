@@ -1,12 +1,10 @@
 <?php
-// تجربة بسيطة للتوقيع الرقمي باستخدام RSA
 
 $message = "Hello, this is my message";
 $signatureText = "";
 $verifyText = "";
 $changeText = "";
 
-// تحديد ملف إعدادات OpenSSL الموجود مع XAMPP
 $opensslConfig = "C:/xampp/php/extras/ssl/openssl.cnf";
 if (file_exists($opensslConfig)) {
     putenv("OPENSSL_CONF=" . $opensslConfig);
@@ -15,7 +13,7 @@ if (file_exists($opensslConfig)) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $message = $_POST["message"] ?? "";
 
-    // إنشاء المفتاح الخاص والعام
+
     $privateKey = openssl_pkey_new([
         "config" => $opensslConfig,
         "private_key_type" => OPENSSL_KEYTYPE_RSA,
@@ -28,15 +26,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $signatureText .= $opensslError . " ";
         }
     } else {
-        // أخذ المفتاح العام
+
         $details = openssl_pkey_get_details($privateKey);
         $publicKey = $details["key"];
 
-        // عمل توقيع للرسالة
+
         openssl_sign($message, $signature, $privateKey, OPENSSL_ALGO_SHA256);
         $signatureText = base64_encode($signature);
 
-        // التأكد من صحة التوقيع
+
         $check = openssl_verify($message, $signature, $publicKey, OPENSSL_ALGO_SHA256);
         if ($check == 1) {
             $verifyText = "التوقيع صحيح للرسالة الأصلية";
@@ -44,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $verifyText = "التوقيع غير صحيح";
         }
 
-        // نجرب تغيير الرسالة ونفحص التوقيع مرة ثانية
+
         $changedMessage = $message . " changed";
         $changedCheck = openssl_verify($changedMessage, $signature, $publicKey, OPENSSL_ALGO_SHA256);
 
@@ -64,10 +62,12 @@ function safeText($text)
 
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <title>تجربة توقيع RSA</title>
 </head>
+
 <body>
     <h1>تجربة التوقيع الرقمي RSA</h1>
     <p>في هذا المثال نوقع رسالة ثم نتأكد أن التوقيع صحيح.</p>
@@ -87,4 +87,5 @@ function safeText($text)
         <p><?= safeText($changeText) ?></p>
     <?php endif; ?>
 </body>
+
 </html>
